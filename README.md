@@ -1,6 +1,6 @@
 # PRACTICE of MySQL DATABASES
 
-!(diagram_relations_DB.png)
+![Computer view](diagram_relations_DB.png)
 
 # INSERT AND UPDATE
 
