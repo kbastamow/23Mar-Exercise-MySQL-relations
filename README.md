@@ -128,8 +128,8 @@ SELECT * FROM orders;
 | id | name            | price | >>> | id | name            | price |
 |----|-----------------|-------|---|----|-----------------|-------|
 | 1  | Electric guitar | 599.5 | >>>| 1  | Electric guitar | 599.5 |
-| 2  | Acoustic guitar | 345   | >>>| 2  | <mark>Spanish guitar</mark>  | 345   |
-| 3  | Flute           | NULL  | >>> | 3  | Flute           | <mark>50</mark>   |
+| 2  | Acoustic guitar | 345   | >>>| 2  | <b>Spanish guitar</b>  | 345   |
+| 3  | Flute           | NULL  | >>> | 3  | Flute           | <b>50</b>   |
 | 4  | Hairspray       | 69.99 | >>>| 4  | Hairspray       | 69.99 |
 | 5  | Lipstick        | 20    | >>> | 5  | Lipstick        | 20    |
 | 6  | Cough drops     | NULL  | >>> | 6  | Cough drops     | NULL  |
@@ -217,8 +217,8 @@ FROM users
 LEFT JOIN orders ON users.id=orders.user_id
 LEFT JOIN products_orders ON orders.id=products_orders.order_id
 INNER JOIN products ON products.id=products_orders.product_id
-GROUP BY orders.id  # THIS HERE allows several products to be written on the same line with the order
-ORDER BY users.name; # This orders the table by name
+GROUP BY orders.id  -- THIS HERE allows several products to be written on the same line with the order. If you remove the GROUP BY clause, MySQL will not know how to group the results, and will return an error. 
+ORDER BY users.name; --This orders the table by name
 ```
 | client_full_name  | order_id | contains_products                      |
 |-------------------|----------|----------------------------------------|
@@ -239,7 +239,6 @@ FROM products
 INNER JOIN products_categories ON products.id=products_categories.product_id
 INNER JOIN categories ON categories.id=products_categories.category_id
 GROUP BY products.id;
--- This line is necessary, or the code won't work. If you remove the GROUP BY clause, MySQL will not know how to group the results, and will return an error. 
 ```
 | product_id | product         | found_in_categories    |
 |------------|-----------------|------------------------|
@@ -261,7 +260,7 @@ FROM products
 INNER JOIN products_categories ON products.id=products_categories.product_id
 INNER JOIN categories ON categories.id=products_categories.category_id
 WHERE products.id=8;
---IN THE ABOVE CODE, GROUP BY is not necessary because there is only one product. If we include it, put WHERE-clause just above it.
+--IN THE ABOVE CODE, GROUP BY is not necessary because there is only one product. If we include it, WHERE-clause should go just above it.
 ```
 | product_id | product     | found_in_categories    |
 |------------|-------------|------------------------|
