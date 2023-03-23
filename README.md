@@ -1,3 +1,7 @@
+# PRACTICE of MySQL DATABASES
+
+!(diagram_relations_DB.png)
+
 # INSERT AND UPDATE
 
 ## 1. Insert at least 
