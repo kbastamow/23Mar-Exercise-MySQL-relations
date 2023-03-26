@@ -1,10 +1,14 @@
 # PRACTICE of MySQL DATABASES
 
+Creating, reading and manipulating a MySQL database using MySQL worbench.
+
+Diagram:
 ![Computer view](diagram_relations_DB.png)
 
 # INSERT AND UPDATE
 
-## 1. Insert at least 
+## 1. Insert 
+>at least 
 >* 5 users
 >* 5 products
 >* 5 orders
@@ -159,7 +163,7 @@ SELECT * FROM orders;
 
 # OBTAINING DATA
 
-## 1.Select products that cost more than 20
+## 1. Select products that cost more than 20
 ```SQL
 SELECT * FROM products WHERE price > 20;
 ```
@@ -284,17 +288,229 @@ GROUP BY orders.id;
 | 3       | Tina Turner | 2        | Jack Daniels          |
 | 3       | Tina Turner | 4        | Lipstick, Cough drops |
 
+---
+# Extra exercices 
+## Delete a product by id
+
+First deletion attempt failed.
+
+```SQL
+DELETE from products where id=2; -- Won't work because of FOREIGN KEY CONSTRAINT. Must delete from child tables before deleting from this table
+
+SHOW CREATE TABLE products_categories; -- shows the table and its properties
+
+-- The following code deletes the constricting foreign key, and adds it again, this time with "on delete cascade" command. The reference will get deleted when parent is deleted.
+
+ALTER TABLE products_categories
+DROP FOREIGN KEY `product_id_ibfk_2`;  -- BACKTICKS!
+
+ALTER TABLE products_categories
+ADD CONSTRAINT `product_id`  -- BACKTICKS!
+FOREIGN KEY (`product_id`)  -- BACKTICKS!
+REFERENCES products (`id`)   -- BACKTICKS!
+ON DELETE CASCADE;
+
+-- repeated for products_orders Table
+```
+After the above procedure, we can delete product 2.
+```SQL
+DELETE from products where id=2;
+```
+| id | name            | price |
+|----|-----------------|-------|
+| 1  | Electric guitar | 599.5 |
+| 3  | Flute           | 50    |
+| 4  | Hairspray       | 69.99 |
+| 5  | Lipstick        | 20    |
+| 6  | Cough drops     | NULL  |
+| 7  | Jack Daniels    | 45    |
+| 8  | Energy bars     | NULL  |
+---
+## Create a new table reviews with corresponding relationship 
+(one-to-many with users and products)
+
+```SQL
+CREATE TABLE reviews(
+   id INT AUTO_INCREMENT,
+   product_id INT,
+   user_id INT,
+   rating VARCHAR(1),
+   title VARCHAR(50),
+   body TEXT,
+   publish_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+   PRIMARY KEY(id),
+   FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+```
+
+## Insert data into reviews
+
+```SQL
+INSERT INTO reviews (product_id, user_id, rating, title, body, publish_date) VALUES
+	(3, 5, 5, 'Excellent sound', 'First-class flute for all your musical needs', default),
+    (6, 4, 2, 'Bad taste', 'These sweets are effective but taste terrible', default),
+    (6, 3, 4, 'Ok product', 'The quantity could be higher', default),
+    (7, 3, 5, 'Perfect', null, default),
+    (1, 2, 4, 'Would buy again', 'Great sound and won\'t break on impact', default); 
+```
+Escape character \ works correctly on MySQL workbench even though the above code displays it as incorrect (MD).
+
+## Change a review
+```SQL
+UPDATE reviews
+SET rating=1, title='Would not buy again', body='It broke on impact with amplifier', publish_date=default
+WHERE id=5;
+```
+
+
+---
+# Select all reviews 
+```SQL
+SELECT * from reviews;
+```
+Original:
+
+
+| id | product_id | user_id | rating | title           | body                                          | publish_date     |
+|----|------------|---------|--------|-----------------|-----------------------------------------------|------------------|
+| 1  | 3          | 5       | 5      | Excellent sound | First-class flute for all your musical needs  | 26/03/2023 15:31 |
+| 2  | 6          | 4       | 2      | Bad taste       | These sweets are effective but taste terrible | 26/03/2023 15:31 |
+| 3  | 6          | 3       | 4      | Ok product      | The quantity could be higher                  | 26/03/2023 15:31 |
+| 4  | 7          | 3       | 5      | Perfect         | NULL                                          | 26/03/2023 15:31 |
+| 5  | 1          | 2       | 4      | Would buy again | Great sound and won't break on impact         | 26/03/2023 15:31 |
+
+After changing review no 5
+
+| 5 | 1 | 2 | 1 | Would not buy again | It broke on impact with amplifier | 26/03/2023 15:36 |
+|---|---|---|---|---------------------|-----------------------------------|------------------|
+---
+# Select all the products with their corresponding reviews.
+```SQL
+SELECT 
+products.id AS product_id, products.name, reviews.rating AS stars_given, reviews.title, reviews.body
+FROM products
+LEFT JOIN reviews ON products.id=reviews.product_id
+ORDER BY products.id;
+```
+| product_id | name            | stars_given | title               | body                                          |
+|------------|-----------------|-------------|---------------------|-----------------------------------------------|
+| 1          | Electric guitar | 1           | Would not buy again | It broke on impact with amplifier             |
+| 3          | Flute           | 5           | Excellent sound     | First-class flute for all your musical needs  |
+| 4          | Hairspray       | NULL        | NULL                | NULL                                          |
+| 5          | Lipstick        | NULL        | NULL                | NULL                                          |
+| 6          | Cough drops     | 2           | Bad taste           | These sweets are effective but taste terrible |
+| 6          | Cough drops     | 4           | Ok product          | The quantity could be higher                  |
+| 7          | Jack Daniels    | 5           | Perfect             | NULL                                          |
+| 8          | Energy bars     | NULL        | NULL                | NULL                                          |
+---
+# Show one product with reviews
+```SQL
+SELECT 
+	products.id AS product_id, products.name, reviews.rating AS stars_given, reviews.title, reviews.body
+	FROM products
+	LEFT JOIN reviews ON products.id=reviews.product_id
+    WHERE products.id=6
+    ORDER BY products.id;
+```
+
+| product_id | name        | stars_given | title      | body                                          |
+|------------|-------------|-------------|------------|-----------------------------------------------|
+| 6          | Cough drops | 2           | Bad taste  | These sweets are effective but taste terrible |
+| 6          | Cough drops | 4           | Ok product | The quantity could be higher                  |
+
+---
+# Show the products together with the category they belong to and the reviews
+```SQL
+SELECT 
+products.id AS product_id, products.name,
+GROUP_CONCAT(categories.name SEPARATOR '; ') AS found_in_categories, 
+reviews.rating AS stars_given, CONCAT(reviews.title, ': ', reviews.body) AS review
+FROM reviews
+RIGHT JOIN products ON products.id=reviews.product_id
+INNER JOIN products_categories ON products.id=products_categories.product_id
+INNER JOIN categories ON categories.id=products_categories.category_id
+GROUP BY products.id, products.name, reviews.rating,  reviews.title,  reviews.body; -- ONLY_FULL_GROUP_BY is enabled by default and requires that all columns in the SELECT clause that are not aggregated must also appear in the GROUP BY clause. Alternative is to disable the ONLY_FULL_GROUP_BY mode
+```
+| product_id | name            | found_in_categories    | stars_given | review                                                        |
+|------------|-----------------|------------------------|-------------|---------------------------------------------------------------|
+| 1          | Electric guitar | Musical instruments    | 1           | Would not buy again: It broke on impact with amplifier        |
+| 3          | Flute           | Musical instruments    | 5           | Excellent sound: First-class flute for all your musical needs |
+| 4          | Hairspray       | Cosmetics              | NULL        | NULL                                                          |
+| 5          | Lipstick        | Cosmetics              | NULL        | NULL                                                          |
+| 6          | Cough drops     | Health; Food and drink | 2           | Bad taste: These sweets are effective but taste terrible      |
+| 6          | Cough drops     | Health; Food and drink | 4           | Ok product: The quantity could be higher                      |
+| 7          | Jack Daniels    | Food and drink         | 5           | NULL                                                          |
+| 8          | Energy bars     | Health; Food and drink | NULL        | NULL                                                          |
+
+
+# Summary of findings 
+
+## Foreign key
+
+Foreign key causes some constraints, one of which is that a row cannot be deleted from the parent table because foreign key's default behaviour is set to ON DELETE RESTRICT.
+
+Ways to get around this:
+
+1. Go around your database and delete all children first.
+
+2. Set foreign key to **ON DELETE CASCADE**. When parent is deleted, child references are automatically deleted.
+
+3. Set foreign key to null **ON DELETE SET NULL**. The advantage is that past references will still be preserved (e.g. a product is deleted but the its purchase history will not disappear). However, this can result in orphans (child rows with no parent row) that cause problems. Further investigation needed.
+
+4. Disable foreign key check. This method should be used with caution because disabling the foreign key check can allow you to violate referential integrity constraints.
 
 
 
+To change an existing foreign key's on-delete behaviour, drop the key and then create it again with the correct specs:
+```SQL
+--DROP KEY:
+ALTER TABLE child_table 
+DROP FOREIGN KEY fk_constraint_name; --can be found by SHOW CREATE TABLE table_name
 
+--CREATE ANEW:
+ALTER TABLE child_table 
+ADD CONSTRAINT fk_constraint_name 
+FOREIGN KEY (child_column) -- the column in the child table that references parent 
+REFERENCES parent_table (parent_column) 
+ON DELETE CASCADE;
+```
 
+## GROUP BY
 
-
-
+MySQL comes by default with mode ONLY_FULL_GROUP_BY , which requires that all columns in the SELECT clause that are not aggregated must also appear in the GROUP BY clause.
     
-    
- 
+This will not work:
+```SQL
+SELECT 
+products.id, --not aggregated
+products.name, --not aggregated
+GROUP_CONCAT(categories.name SEPARATOR '; '), --aggregated
+reviews.rating, --not aggregated
+reviews.title,  --not aggregated
+reviews.body --not aggregated
+FROM reviews
+RIGHT JOIN products ON products.id=reviews.product_id
+INNER JOIN products_categories ON products.id=products_categories.product_id
+INNER JOIN categories ON categories.id=products_categories.category_id
+GROUP BY products.id; -- HERE only one
+```
+Whereas this will:
+
+```SQL
+GROUP BY 
+    products.id, 
+    products.name, 
+    reviews.rating,
+    reviews.title,
+    reviews.body;
+```
+
+Alternatively, we can modify disable the ONLY_FULL_GROUP_BY mode by running the following command before the query:
+
+```SQL
+SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
+```
 
 
 
