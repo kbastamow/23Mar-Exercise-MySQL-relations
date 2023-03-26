@@ -378,7 +378,7 @@ WHERE id=5;
 
 
 ---
-# Select all reviews 
+## Select all reviews 
 ```SQL
 SELECT * from reviews;
 ```
@@ -398,7 +398,7 @@ After changing review no 5
 | 5 | 1 | 2 | 1 | Would not buy again | It broke on impact with amplifier | 26/03/2023 15:36 |
 |---|---|---|---|---------------------|-----------------------------------|------------------|
 ---
-# Select all the products with their corresponding reviews.
+## Select all the products with their corresponding reviews.
 ```SQL
 SELECT 
 products.id AS product_id, products.name, reviews.rating AS stars_given, reviews.title, reviews.body
@@ -417,7 +417,7 @@ ORDER BY products.id;
 | 7          | Jack Daniels    | 5           | Perfect             | NULL                                          |
 | 8          | Energy bars     | NULL        | NULL                | NULL                                          |
 ---
-# Show one product with reviews
+## Show one product with reviews
 ```SQL
 SELECT 
 	products.id AS product_id, products.name, reviews.rating AS stars_given, reviews.title, reviews.body
@@ -433,7 +433,7 @@ SELECT
 | 6          | Cough drops | 4           | Ok product | The quantity could be higher                  |
 
 ---
-# Show the products together with the category they belong to and the reviews
+## Show the products together with the category they belong to and the reviews
 ```SQL
 SELECT 
 products.id AS product_id, products.name,
