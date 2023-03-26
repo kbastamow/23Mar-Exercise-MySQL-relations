@@ -5,9 +5,19 @@ Creating, reading and manipulating a MySQL database using MySQL worbench.
 Diagram:
 ![Computer view](diagram_relations_DB.png)
 
+Jump to
+
+- [Insert data](#insert)
+- [Update data](#modifying-products) 
+- [Read data](#obtaining-data)
+- [Extra exercices](#extra-exercices)
+- [Findings](#summary-of-findings)
+
+
+
 # INSERT AND UPDATE
 
-## 1. Insert 
+## Insert 
 >at least 
 >* 5 users
 >* 5 products
@@ -235,26 +245,6 @@ ORDER BY users.name; --This orders the table by name
 
 ---
 
-##  (My own exercise) Show all products with their id and show category
-```SQL
-SELECT
-products.id AS product_id, products.name AS product, GROUP_CONCAT(categories.name SEPARATOR '; ') AS found_in_categories
-FROM products
-INNER JOIN products_categories ON products.id=products_categories.product_id
-INNER JOIN categories ON categories.id=products_categories.category_id
-GROUP BY products.id;
-```
-| product_id | product         | found_in_categories    |
-|------------|-----------------|------------------------|
-| 1          | Electric guitar | Musical instruments    |
-| 2          | Spanish guitar  | Musical instruments    |
-| 3          | Flute           | Musical instruments    |
-| 4          | Hairspray       | Cosmetics              |
-| 5          | Lipstick        | Cosmetics              |
-| 6          | Cough drops     | Health; Food and drink |
-| 7          | Jack Daniels    | Food and drink         |
-| 8          | Energy bars     | Health; Food and drink |
----
  ## 5. Show one product with its id and show category
 
 ```SQL
@@ -287,6 +277,29 @@ GROUP BY orders.id;
 |---------|-------------|----------|-----------------------|
 | 3       | Tina Turner | 2        | Jack Daniels          |
 | 3       | Tina Turner | 4        | Lipstick, Cough drops |
+---
+##  (My own exercise) Show all products with their id and show category
+```SQL
+SELECT
+products.id AS product_id, products.name AS product, GROUP_CONCAT(categories.name SEPARATOR '; ') AS found_in_categories
+FROM products
+INNER JOIN products_categories ON products.id=products_categories.product_id
+INNER JOIN categories ON categories.id=products_categories.category_id
+GROUP BY products.id;
+```
+| product_id | product         | found_in_categories    |
+|------------|-----------------|------------------------|
+| 1          | Electric guitar | Musical instruments    |
+| 2          | Spanish guitar  | Musical instruments    |
+| 3          | Flute           | Musical instruments    |
+| 4          | Hairspray       | Cosmetics              |
+| 5          | Lipstick        | Cosmetics              |
+| 6          | Cough drops     | Health; Food and drink |
+| 7          | Jack Daniels    | Food and drink         |
+| 8          | Energy bars     | Health; Food and drink |
+---
+
+
 
 ---
 # Extra exercices 
